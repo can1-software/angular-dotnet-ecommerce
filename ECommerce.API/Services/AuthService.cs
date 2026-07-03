@@ -37,7 +37,8 @@ public class AuthService : IAuthService
         {
             FullName = dto.FullName,
             Email = dto.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+            Role = UserRole.Customer // Kayıt olan herkes müşteri olur.
         };
 
         // 3) Veritabanına ekle ve kaydet.
@@ -49,6 +50,7 @@ public class AuthService : IAuthService
         {
             FullName = user.FullName,
             Email = user.Email,
+            Role = user.Role,
             Token = GenerateJwtToken(user)
         };
 
@@ -72,6 +74,7 @@ public class AuthService : IAuthService
         {
             FullName = user.FullName,
             Email = user.Email,
+            Role = user.Role,
             Token = GenerateJwtToken(user)
         };
 
@@ -92,7 +95,8 @@ public class AuthService : IAuthService
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim("fullName", user.FullName)
+            new Claim("fullName", user.FullName),
+            new Claim(ClaimTypes.Role, user.Role) // Rol bilgisi token'da; [Authorize(Roles="Admin")] bunu kullanır.
         };
 
         // Token'ı oluştur: kim yayınladı, kim için, ne zaman geçersiz olacak vb.

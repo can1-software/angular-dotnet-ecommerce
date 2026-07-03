@@ -20,6 +20,15 @@
         <a routerLink="/login" class="btn-ghost hidden sm:inline-flex">Giriş Yap</a>
         <a routerLink="/register" class="btn-primary !py-2 !px-4 text-xs sm:text-sm">Kayıt Ol</a>
       } @else {
+        @if (authService.isAdmin()) {
+          <a routerLink="/admin"
+             class="hidden items-center gap-1.5 rounded-xl bg-brand-500/10 px-3 py-2 text-xs font-semibold text-brand-400 transition hover:bg-brand-500/20 sm:inline-flex">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m0 0v12m0-12h9.75m-9.75 0a1.5 1.5 0 00-1.5 1.5v9.75a1.5 1.5 0 001.5 1.5h9.75a1.5 1.5 0 001.5-1.5V7.5a1.5 1.5 0 00-1.5-1.5h-9.75z" />
+            </svg>
+            Admin Panel
+          </a>
+        }
         <!-- Kullanıcı bilgisi -->
         <div class="hidden items-center gap-3 sm:flex">
           <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-xs font-bold text-white shadow-md">

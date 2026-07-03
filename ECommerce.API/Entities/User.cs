@@ -19,4 +19,7 @@ public class User
 
     // Kaydın oluşturulma tarihi
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // Kullanıcı rolü: Admin veya Customer (varsayılan müşteri).
+    public string Role { get; set; } = UserRole.Customer;
 }

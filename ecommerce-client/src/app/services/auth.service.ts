@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.models';
+import { AuthResponse, LoginRequest, RegisterRequest, UserRole } from '../models/auth.models';
 
 // Bu servis, kimlik doğrulama (auth) ile ilgili her şeyi yönetir:
 // - Backend'e register/login isteği atmak
@@ -25,8 +25,11 @@ export class AuthService {
   // Dışarıya salt-okunur bir görünüm sunuyoruz.
   user = this.currentUser.asReadonly();
 
-  // Giriş yapılmış mı? (computed = user değişince otomatik hesaplanır)
+  // Giriş yapılmış mı?
   isLoggedIn = computed(() => this.currentUser() !== null);
+
+  // Admin mi?
+  isAdmin = computed(() => this.currentUser()?.role === UserRole.Admin);
 
   // Kayıt ol: backend'e istek atar, başarılıysa kullanıcıyı oturum açmış sayar.
   register(data: RegisterRequest): Observable<AuthResponse> {

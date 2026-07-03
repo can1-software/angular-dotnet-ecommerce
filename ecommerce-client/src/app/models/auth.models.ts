@@ -16,5 +16,11 @@ export interface LoginRequest {
 export interface AuthResponse {
   fullName: string;
   email: string;
+  role: string;
   token: string;
 }
+
+export const UserRole = {
+  Admin: 'Admin',
+  Customer: 'Customer',
+} as const;

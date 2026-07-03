@@ -1,0 +1,39 @@
+<div class="max-w-xl">
+  <a routerLink="/admin/categories" class="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-800">
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+    </svg>
+    Kategorilere Dön
+  </a>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <h2 class="mb-6 text-lg font-bold text-slate-900">Yeni Kategori</h2>
+
+    @if (errorMessage()) {
+      <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" class="space-y-5">
+      <div>
+        <label class="label-field" for="name">Kategori Adı</label>
+        <input id="name" type="text" name="name" [(ngModel)]="name" required
+               placeholder="Örn: Elektronik" class="input-field" />
+      </div>
+
+      <div>
+        <label class="label-field" for="description">Açıklama (isteğe bağlı)</label>
+        <textarea id="description" name="description" [(ngModel)]="description" rows="3"
+                  placeholder="Kısa açıklama" class="input-field resize-none"></textarea>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit" [disabled]="loading()" class="btn-primary">
+          @if (loading()) { Kaydediliyor... } @else { Kaydet }
+        </button>
+        <a routerLink="/admin/categories" class="btn-secondary">İptal</a>
+      </div>
+    </form>
+  </div>
+</div>
