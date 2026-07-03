@@ -1,0 +1,11 @@
+# .NET derleme çıktıları
+bin/
+obj/
+
+# Kullanıcıya özel Visual Studio / Rider dosyaları
+.vs/
+.idea/
+*.user
+
+# Ortam / gizli bilgiler (gerçek projede şifreleri buraya koyma)
+appsettings.*.local.json
