@@ -25,6 +25,19 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // arka planda AuthService örneği üretilir (Scoped = her HTTP isteği için bir tane).
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// CORS: Angular uygulaması farklı bir adreste (http://localhost:4200) çalışır.
+// Tarayıcı, güvenlik gereği farklı adrese giden istekleri varsayılan olarak engeller.
+// Bu politika ile Angular'ın bizim API'ye istek atmasına izin veriyoruz.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // JWT ayarlarını okuyalım.
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
@@ -62,6 +75,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// CORS politikasını devreye al (Authentication'dan önce olmalı).
+app.UseCors("AngularPolicy");
 
 // Önce "kimsin?" (Authentication), sonra "yetkin var mı?" (Authorization).
 app.UseAuthentication();

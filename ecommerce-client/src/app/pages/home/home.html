@@ -1,0 +1,130 @@
+<!-- Giriş yapılmışsa: kişiselleştirilmiş karşılama -->
+@if (authService.isLoggedIn()) {
+  <section class="relative overflow-hidden bg-surface-950 px-4 py-20 sm:px-6 lg:px-8">
+    <!-- Dekoratif arka plan -->
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute -top-24 right-0 h-96 w-96 rounded-full bg-brand-500/10 blur-3xl"></div>
+      <div class="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-brand-600/10 blur-3xl"></div>
+    </div>
+
+    <div class="relative mx-auto max-w-7xl">
+      <div class="mb-10">
+        <p class="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-400">Hesabın aktif</p>
+        <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+          Merhaba, {{ authService.user()?.fullName }} 👋
+        </h1>
+        <p class="mt-4 max-w-xl text-lg text-slate-400">
+          Alışverişe hazırsın. Yakında burada ürünler, sepet ve siparişlerin olacak.
+        </p>
+      </div>
+
+      <!-- Dashboard önizleme kartları -->
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/20">
+            <svg class="h-5 w-5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+            </svg>
+          </div>
+          <p class="text-sm font-semibold text-white">Sepetim</p>
+          <p class="mt-1 text-xs text-slate-500">Yakında aktif olacak</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/20">
+            <svg class="h-5 w-5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+          </div>
+          <p class="text-sm font-semibold text-white">Siparişlerim</p>
+          <p class="mt-1 text-xs text-slate-500">Yakında aktif olacak</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+          <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/20">
+            <svg class="h-5 w-5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+          </div>
+          <p class="text-sm font-semibold text-white">Profilim</p>
+          <p class="mt-1 text-xs text-slate-500">{{ authService.user()?.email }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+} @else {
+  <!-- Giriş yapılmamışsa: hero bölümü -->
+  <section class="relative overflow-hidden bg-surface-950">
+  <!-- Mesh gradient arka plan -->
+  <div class="pointer-events-none absolute inset-0">
+    <div class="absolute -top-40 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-brand-600/20 blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-brand-400/10 blur-3xl"></div>
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+  </div>
+
+  <div class="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
+    <div class="mx-auto max-w-3xl text-center">
+      <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-brand-400">
+        <span class="h-1.5 w-1.5 rounded-full bg-brand-400 animate-pulse"></span>
+        Yeni nesil alışveriş deneyimi
+      </div>
+      <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl">
+        Alışverişin
+        <span class="bg-gradient-to-r from-brand-300 to-brand-500 bg-clip-text text-transparent"> yeni adresi</span>
+      </h1>
+      <p class="mt-6 text-lg leading-relaxed text-slate-400 sm:text-xl">
+        NovaShop ile güvenli, hızlı ve keyifli bir e-ticaret deneyimi. Hemen hesap oluştur veya giriş yap.
+      </p>
+      <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <a routerLink="/register" class="btn-primary w-full sm:w-auto !px-8 !py-3.5 !text-base">
+          Ücretsiz Kayıt Ol
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </a>
+        <a routerLink="/login" class="btn-secondary w-full sm:w-auto !px-8 !py-3.5 !text-base !bg-white/10 !border-white/20 !text-white hover:!bg-white/20">
+          Giriş Yap
+        </a>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <!-- Özellikler bölümü -->
+  <section class="bg-surface-50 px-4 py-20 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl">
+      <div class="mb-12 text-center">
+        <h2 class="text-3xl font-bold tracking-tight text-slate-900">Neden NovaShop?</h2>
+        <p class="mt-3 text-slate-500">Güvenli altyapı, modern tasarım, sorunsuz deneyim.</p>
+      </div>
+      <div class="grid gap-6 sm:grid-cols-3">
+        <div class="group rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/5">
+          <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Güvenli Altyapı</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-500">JWT tabanlı kimlik doğrulama ve şifrelenmiş veri saklama ile tam güvenlik.</p>
+        </div>
+        <div class="group rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/5">
+          <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Hızlı Performans</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-500">Angular ve .NET ile optimize edilmiş, milisaniyeler içinde yanıt veren API.</p>
+        </div>
+        <div class="group rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/5">
+          <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Mobil Uyumlu</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-500">Her ekran boyutunda kusursuz görünen, responsive tasarım.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+}
