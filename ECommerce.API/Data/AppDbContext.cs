@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Product> Products => Set<Product>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -20,9 +21,18 @@ public class AppDbContext : DbContext
             .HasIndex(u => u.Email)
             .IsUnique();
 
-        // Kategori adı benzersiz olsun.
         modelBuilder.Entity<Category>()
             .HasIndex(c => c.Name)
             .IsUnique();
+
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.Property(p => p.Price).HasPrecision(18, 2);
+
+            entity.HasOne(p => p.Category)
+                .WithMany()
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 }

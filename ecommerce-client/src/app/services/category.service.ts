@@ -1,15 +1,29 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Category, CreateCategoryRequest, UpdateCategoryRequest } from '../models/category.models';
+import {
+  Category,
+  CategoryQuery,
+  CreateCategoryRequest,
+  PagedCategoryResult,
+  UpdateCategoryRequest
+} from '../models/category.models';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
   private http = inject(HttpClient);
   private readonly apiUrl = 'http://localhost:5036/api/categories';
 
-  getAll(): Observable<Category[]> {
-    return this.http.get<Category[]>(this.apiUrl);
+  getPaged(query: CategoryQuery = {}): Observable<PagedCategoryResult> {
+    let params = new HttpParams()
+      .set('page', String(query.page ?? 1))
+      .set('pageSize', String(query.pageSize ?? 10));
+
+    if (query.search?.trim()) {
+      params = params.set('search', query.search.trim());
+    }
+
+    return this.http.get<PagedCategoryResult>(this.apiUrl, { params });
   }
 
   getById(id: number): Observable<Category> {

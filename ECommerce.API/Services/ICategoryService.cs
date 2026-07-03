@@ -4,7 +4,7 @@ namespace ECommerce.API.Services;
 
 public interface ICategoryService
 {
-    Task<List<CategoryDto>> GetAllAsync();
+    Task<PagedResultDto<CategoryDto>> GetPagedAsync(string? search, int page, int pageSize);
     Task<CategoryDto?> GetByIdAsync(int id);
     Task<(bool Success, string Message, CategoryDto? Data)> CreateAsync(CreateCategoryDto dto);
     Task<(bool Success, string Message, CategoryDto? Data)> UpdateAsync(int id, UpdateCategoryDto dto);

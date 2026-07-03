@@ -14,3 +14,17 @@ export interface UpdateCategoryRequest {
   name: string;
   description?: string;
 }
+
+export interface PagedCategoryResult {
+  items: Category[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface CategoryQuery {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}

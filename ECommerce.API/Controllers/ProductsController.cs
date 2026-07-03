@@ -5,68 +5,62 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers;
 
-// Sadece Admin rolündeki kullanıcılar erişebilir.
 [Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/[controller]")]
-public class CategoriesController : ControllerBase
+public class ProductsController : ControllerBase
 {
-    private readonly ICategoryService _categoryService;
+    private readonly IProductService _productService;
 
-    public CategoriesController(ICategoryService categoryService)
+    public ProductsController(IProductService productService)
     {
-        _categoryService = categoryService;
+        _productService = productService;
     }
 
-    // GET /api/categories?search=elek&page=1&pageSize=10
     [HttpGet]
     public async Task<IActionResult> GetPaged(
         [FromQuery] string? search,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
-        var result = await _categoryService.GetPagedAsync(search, page, pageSize);
+        var result = await _productService.GetPagedAsync(search, page, pageSize);
         return Ok(result);
     }
 
-    // GET /api/categories/5
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var category = await _categoryService.GetByIdAsync(id);
-        if (category is null)
-            return NotFound(new { message = "Kategori bulunamadı." });
+        var product = await _productService.GetByIdAsync(id);
+        if (product is null)
+            return NotFound(new { message = "Ürün bulunamadı." });
 
-        return Ok(category);
+        return Ok(product);
     }
 
-    // POST /api/categories
     [HttpPost]
-    public async Task<IActionResult> Create(CreateCategoryDto dto)
+    public async Task<IActionResult> Create(CreateProductDto dto)
     {
-        var result = await _categoryService.CreateAsync(dto);
+        var result = await _productService.CreateAsync(dto);
         if (!result.Success)
             return BadRequest(new { message = result.Message });
 
         return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
     }
 
-    // PUT /api/categories/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateCategoryDto dto)
+    public async Task<IActionResult> Update(int id, UpdateProductDto dto)
     {
-        var result = await _categoryService.UpdateAsync(id, dto);
+        var result = await _productService.UpdateAsync(id, dto);
         if (!result.Success)
             return BadRequest(new { message = result.Message });
 
         return Ok(result.Data);
     }
 
-    // DELETE /api/categories/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var result = await _categoryService.DeleteAsync(id);
+        var result = await _productService.DeleteAsync(id);
         if (!result.Success)
             return NotFound(new { message = result.Message });
 

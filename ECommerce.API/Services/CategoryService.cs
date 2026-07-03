@@ -14,12 +14,41 @@ public class CategoryService : ICategoryService
         _context = context;
     }
 
-    public async Task<List<CategoryDto>> GetAllAsync()
+    public async Task<PagedResultDto<CategoryDto>> GetPagedAsync(string? search, int page, int pageSize)
     {
-        return await _context.Categories
+        // Geçersiz değerleri düzelt.
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 10 : Math.Min(pageSize, 50);
+
+        var query = _context.Categories.AsQueryable();
+
+        // Arama: isim veya açıklamada geçen metin.
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLower();
+            query = query.Where(c =>
+                c.Name.ToLower().Contains(term) ||
+                (c.Description != null && c.Description.ToLower().Contains(term)));
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var categories = await query
             .OrderBy(c => c.Name)
-            .Select(c => ToDto(c))
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedResultDto<CategoryDto>
+        {
+            Items = categories.Select(ToDto).ToList(),
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize,
+            TotalPages = totalPages
+        };
     }
 
     public async Task<CategoryDto?> GetByIdAsync(int id)

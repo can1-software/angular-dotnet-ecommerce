@@ -1,20 +1,20 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { CategoryService } from '../../../services/category.service';
-import { Category } from '../../../models/category.models';
+import { RouterLink } from '@angular/router';
+import { ProductService } from '../../../services/product.service';
+import { Product } from '../../../models/product.models';
 
 @Component({
-  selector: 'app-admin-categories',
-  imports: [RouterLink, FormsModule],
-  templateUrl: './admin-categories.html',
+  selector: 'app-admin-products',
+  imports: [RouterLink, FormsModule, DecimalPipe],
+  templateUrl: './admin-products.html',
 })
-export class AdminCategories implements OnInit {
-  private categoryService = inject(CategoryService);
-  private router = inject(Router);
+export class AdminProducts implements OnInit {
+  private productService = inject(ProductService);
   private searchTimeout?: ReturnType<typeof setTimeout>;
 
-  categories = signal<Category[]>([]);
+  products = signal<Product[]>([]);
   loading = signal(true);
   errorMessage = signal('');
   successMessage = signal('');
@@ -28,59 +28,57 @@ export class AdminCategories implements OnInit {
   ngOnInit(): void {
     const msg = history.state?.['message'];
     if (msg) this.successMessage.set(msg);
-
-    this.loadCategories();
+    this.loadProducts();
   }
 
   onSearchChange(): void {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
       this.currentPage.set(1);
-      this.loadCategories();
+      this.loadProducts();
     }, 400);
   }
 
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages() || page === this.currentPage()) return;
     this.currentPage.set(page);
-    this.loadCategories();
+    this.loadProducts();
   }
 
-  loadCategories(): void {
+  loadProducts(): void {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    this.categoryService.getPaged({
+    this.productService.getPaged({
       search: this.searchTerm,
       page: this.currentPage(),
       pageSize: this.pageSize(),
     }).subscribe({
       next: (result) => {
-        this.categories.set(result.items);
+        this.products.set(result.items);
         this.totalCount.set(result.totalCount);
         this.totalPages.set(result.totalPages);
         this.currentPage.set(result.page);
         this.loading.set(false);
       },
       error: () => {
-        this.errorMessage.set('Kategoriler yüklenemedi.');
+        this.errorMessage.set('Ürünler yüklenemedi.');
         this.loading.set(false);
       }
     });
   }
 
-  deleteCategory(id: number, name: string): void {
-    if (!confirm(`"${name}" kategorisini silmek istediğine emin misin?`)) return;
+  deleteProduct(id: number, name: string): void {
+    if (!confirm(`"${name}" ürününü silmek istediğine emin misin?`)) return;
 
     this.errorMessage.set('');
-    this.categoryService.delete(id).subscribe({
+    this.productService.delete(id).subscribe({
       next: () => {
-        this.successMessage.set('Kategori silindi.');
-        // Son sayfada tek kayıt kaldıysa bir önceki sayfaya git.
-        if (this.categories().length === 1 && this.currentPage() > 1) {
+        this.successMessage.set('Ürün silindi.');
+        if (this.products().length === 1 && this.currentPage() > 1) {
           this.currentPage.update(p => p - 1);
         }
-        this.loadCategories();
+        this.loadProducts();
       },
       error: (err) => this.errorMessage.set(err.error?.message ?? 'Silme başarısız.')
     });
