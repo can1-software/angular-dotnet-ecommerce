@@ -14,6 +14,8 @@ export class Header implements OnInit {
   cartService = inject(CartService);
   private router = inject(Router);
 
+  readonly githubUrl = 'https://github.com/can1-software/angular-dotnet-ecommerce';
+
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
       this.cartService.refreshCount();

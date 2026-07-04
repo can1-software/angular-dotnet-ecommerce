@@ -36,6 +36,19 @@ export class Home implements OnInit {
 
   resolveImageUrl = resolveImageUrl;
 
+  readonly heroMainImage = resolveImageUrl('/uploads/products/seed/product-05.jpg');
+  readonly heroAccentImage = resolveImageUrl('/uploads/products/seed/product-08.jpg');
+  readonly heroAccentImage2 = resolveImageUrl('/uploads/products/seed/product-12.jpg');
+
+  scrollToProducts(): void {
+    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  selectedCategoryName(): string {
+    if (!this.selectedCategorySlug) return '';
+    return this.categories().find(c => c.slug === this.selectedCategorySlug)?.name ?? 'Ürünler';
+  }
+
   ngOnInit(): void {
     this.loadCategories();
 
