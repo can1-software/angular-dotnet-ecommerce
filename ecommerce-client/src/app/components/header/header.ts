@@ -1,24 +1,28 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 
-// Sayfanın üstünde her zaman görünen menü çubuğu.
-// Giriş durumuna göre farklı butonlar gösterir.
 @Component({
   selector: 'app-header',
   imports: [RouterLink],
   templateUrl: './header.html',
 })
-export class Header {
-  // AuthService'i içeri alıyoruz; giriş durumu ve kullanıcı bilgisi buradan gelir.
+export class Header implements OnInit {
   authService = inject(AuthService);
+  cartService = inject(CartService);
   private router = inject(Router);
 
-  // Çıkış butonuna basılınca çalışır.
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.cartService.refreshCount();
+    }
+  }
+
   logout(): void {
     this.authService.logout();
-    // Çıkış sonrası ana sayfaya yönlendir.
+    this.cartService.clearCount();
     this.router.navigate(['/']);
   }
 }

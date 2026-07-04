@@ -1,0 +1,48 @@
+<footer class="border-t border-slate-200 bg-surface-950 text-slate-400">
+  <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+      <div>
+        <div class="mb-4 flex items-center gap-2">
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-400 to-brand-600">
+            <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+            </svg>
+          </div>
+          <span class="text-lg font-bold text-white">NovaShop</span>
+        </div>
+        <p class="text-sm leading-relaxed">Güvenli alışveriş, hızlı kargo ve kolay iade. Türkiye'nin yeni nesil e-ticaret platformu.</p>
+      </div>
+
+      <div>
+        <h4 class="mb-4 text-sm font-bold uppercase tracking-wide text-white">Mağaza</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a routerLink="/" class="hover:text-brand-400">Tüm Ürünler</a></li>
+          <li><a routerLink="/cart" class="hover:text-brand-400">Sepetim</a></li>
+          <li><a routerLink="/orders" class="hover:text-brand-400">Siparişlerim</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="mb-4 text-sm font-bold uppercase tracking-wide text-white">Hesap</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a routerLink="/login" class="hover:text-brand-400">Giriş Yap</a></li>
+          <li><a routerLink="/register" class="hover:text-brand-400">Kayıt Ol</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="mb-4 text-sm font-bold uppercase tracking-wide text-white">Destek</h4>
+        <ul class="space-y-2 text-sm">
+          <li>destek&#64;novashop.com</li>
+          <li>0850 000 00 00</li>
+          <li>Pzt–Cmt 09:00–18:00</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs sm:flex-row">
+      <p>&copy; {{ currentYear }} NovaShop. Tüm hakları saklıdır.</p>
+      <p>Güvenli ödeme · Hızlı kargo · 14 gün iade</p>
+    </div>
+  </div>
+</footer>

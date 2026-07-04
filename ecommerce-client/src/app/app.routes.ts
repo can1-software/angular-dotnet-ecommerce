@@ -11,7 +11,12 @@ import { AdminProducts } from './pages/admin/products/admin-products';
 import { AdminProductCreate } from './pages/admin/products/admin-product-create';
 import { AdminProductEdit } from './pages/admin/products/admin-product-edit';
 import { ProductDetail } from './pages/product-detail/product-detail';
+import { CartPage } from './pages/cart/cart';
+import { Checkout } from './pages/checkout/checkout';
+import { Orders } from './pages/orders/orders';
+import { OrderDetail } from './pages/orders/order-detail';
 import { adminGuard } from './guards/admin.guard';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -23,6 +28,10 @@ export const routes: Routes = [
       { path: 'products/:slug', component: ProductDetail },
       { path: 'login', component: Login },
       { path: 'register', component: Register },
+      { path: 'cart', component: CartPage, canActivate: [authGuard] },
+      { path: 'checkout', component: Checkout, canActivate: [authGuard] },
+      { path: 'orders', component: Orders, canActivate: [authGuard] },
+      { path: 'orders/:id', component: OrderDetail, canActivate: [authGuard] },
     ]
   },
   {

@@ -1,4 +1,5 @@
 export const API_BASE_URL = 'http://localhost:5036';
+export const FRONTEND_BASE_URL = 'http://localhost:4200';
 
 export function resolveImageUrl(imageUrl?: string | null): string | null {
   if (!imageUrl) return null;

@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 
-// Giriş sayfası (adres: "/login").
 @Component({
   selector: 'app-login',
   imports: [FormsModule, RouterLink],
@@ -11,25 +11,25 @@ import { AuthService } from '../../services/auth.service';
 })
 export class Login {
   private authService = inject(AuthService);
+  private cartService = inject(CartService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  // Formdaki input'lara bağlanacak alanlar (two-way binding ile [(ngModel)]).
   email = '';
   password = '';
-
-  // Kullanıcıya gösterilecek hata mesajı ve "işlem sürüyor" durumu.
   errorMessage = signal('');
   loading = signal(false);
 
-  // Form gönderildiğinde çalışır.
   onSubmit(): void {
     this.errorMessage.set('');
     this.loading.set(true);
 
     this.authService.login({ email: this.email, password: this.password }).subscribe({
-      // Başarılı: ana sayfaya yönlendir.
-      next: () => this.router.navigate(['/']),
-      // Hata: backend'den gelen mesajı göster.
+      next: () => {
+        this.cartService.refreshCount();
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+        this.router.navigateByUrl(returnUrl);
+      },
       error: (err) => {
         this.errorMessage.set(err.error?.message ?? 'Giriş yapılamadı. Bilgileri kontrol et.');
         this.loading.set(false);

@@ -1,0 +1,69 @@
+<div class="bg-surface-50 px-4 py-8 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-5xl">
+    <h1 class="mb-6 text-2xl font-extrabold text-slate-900">Sepetim</h1>
+
+    @if (errorMessage()) {
+      <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ errorMessage() }}</div>
+    }
+    @if (successMessage()) {
+      <div class="mb-4 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-800">{{ successMessage() }}</div>
+    }
+
+    @if (loading()) {
+      <div class="py-24 text-center text-slate-400">Yükleniyor...</div>
+    } @else if (!cart()?.items?.length) {
+      <div class="rounded-2xl border border-slate-200 bg-white py-16 text-center">
+        <p class="text-slate-500">Sepetiniz boş.</p>
+        <a routerLink="/" class="btn-primary mt-4 inline-flex">Alışverişe Başla</a>
+      </div>
+    } @else if (cart(); as c) {
+      <div class="grid gap-8 lg:grid-cols-3">
+        <div class="space-y-4 lg:col-span-2">
+          @for (item of c.items; track item.id) {
+            <div class="flex gap-4 rounded-2xl border border-slate-200 bg-white p-4">
+              <a [routerLink]="['/products', item.productSlug]" class="shrink-0">
+                @if (resolveImageUrl(item.productImageUrl); as img) {
+                  <img [src]="img" [alt]="item.productName" class="h-24 w-24 rounded-xl object-cover" />
+                } @else {
+                  <div class="flex h-24 w-24 items-center justify-center rounded-xl bg-slate-100 text-slate-300">—</div>
+                }
+              </a>
+              <div class="flex flex-1 flex-col justify-between">
+                <div>
+                  <a [routerLink]="['/products', item.productSlug]" class="font-bold text-slate-900 hover:text-brand-600">{{ item.productName }}</a>
+                  <p class="mt-1 text-sm font-semibold text-brand-600">{{ item.unitPrice | number:'1.2-2' }} ₺</p>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div class="flex items-center gap-2">
+                    <button type="button" (click)="updateQuantity(item, item.quantity - 1)" [disabled]="item.quantity <= 1"
+                            class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50">−</button>
+                    <span class="w-8 text-center font-semibold">{{ item.quantity }}</span>
+                    <button type="button" (click)="updateQuantity(item, item.quantity + 1)" [disabled]="item.quantity >= item.stock"
+                            class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50">+</button>
+                  </div>
+                  <div class="flex items-center gap-4">
+                    <span class="font-bold text-slate-900">{{ item.lineTotal | number:'1.2-2' }} ₺</span>
+                    <button type="button" (click)="removeItem(item)" class="text-sm text-red-600 hover:text-red-700">Kaldır</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="h-fit rounded-2xl border border-slate-200 bg-white p-6">
+          <h2 class="mb-4 text-lg font-bold text-slate-900">Sipariş Özeti</h2>
+          <div class="space-y-2 text-sm text-slate-600">
+            <div class="flex justify-between"><span>Ürün sayısı</span><span>{{ c.totalItems }}</span></div>
+            <div class="flex justify-between border-t border-slate-100 pt-3 text-base font-bold text-slate-900">
+              <span>Toplam</span><span>{{ c.totalAmount | number:'1.2-2' }} ₺</span>
+            </div>
+          </div>
+          <button type="button" (click)="goToCheckout()" class="btn-primary mt-6 w-full !py-3">
+            Siparişi Tamamla
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
