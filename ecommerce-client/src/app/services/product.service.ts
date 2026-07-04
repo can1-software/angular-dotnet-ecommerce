@@ -8,11 +8,12 @@ import {
   ProductQuery,
   UpdateProductRequest
 } from '../models/product.models';
+import { API_BASE_URL } from '../config/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5036/api/products';
+  private readonly apiUrl = `${API_BASE_URL}/api/products`;
 
   getPaged(query: ProductQuery = {}): Observable<PagedProductResult> {
     let params = new HttpParams()

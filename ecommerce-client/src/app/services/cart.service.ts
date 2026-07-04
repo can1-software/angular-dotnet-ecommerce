@@ -2,11 +2,12 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { AddToCartRequest, Cart, UpdateCartItemRequest } from '../models/cart.models';
+import { API_BASE_URL } from '../config/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5036/api/cart';
+  private readonly apiUrl = `${API_BASE_URL}/api/cart`;
 
   cartItemCount = signal(0);
 

@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { AuthResponse, LoginRequest, RegisterRequest, UserRole } from '../models/auth.models';
+import { API_BASE_URL } from '../config/api.config';
 
 // Bu servis, kimlik doğrulama (auth) ile ilgili her şeyi yönetir:
 // - Backend'e register/login isteği atmak
@@ -11,8 +12,7 @@ import { AuthResponse, LoginRequest, RegisterRequest, UserRole } from '../models
 export class AuthService {
   private http = inject(HttpClient);
 
-  // Backend API'nin adresi. (.NET uygulaması bu portta çalışıyor.)
-  private readonly apiUrl = 'http://localhost:5036/api/auth';
+  private readonly apiUrl = `${API_BASE_URL}/api/auth`;
 
   // localStorage'da veriyi saklarken kullanacağımız anahtar isimleri.
   private readonly tokenKey = 'token';

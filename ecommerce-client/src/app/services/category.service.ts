@@ -8,11 +8,12 @@ import {
   PagedCategoryResult,
   UpdateCategoryRequest
 } from '../models/category.models';
+import { API_BASE_URL } from '../config/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5036/api/categories';
+  private readonly apiUrl = `${API_BASE_URL}/api/categories`;
 
   getPaged(query: CategoryQuery = {}): Observable<PagedCategoryResult> {
     let params = new HttpParams()
