@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<CartItem> CartItems => Set<CartItem>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -80,6 +81,19 @@ public class AppDbContext : DbContext
         {
             entity.Property(i => i.UnitPrice).HasPrecision(18, 2);
             entity.Property(i => i.LineTotal).HasPrecision(18, 2);
+        });
+
+        modelBuilder.Entity<ProductReview>(entity =>
+        {
+            entity.HasIndex(r => new { r.ProductId, r.UserId }).IsUnique();
+            entity.HasOne(r => r.Product)
+                .WithMany()
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

@@ -1,23 +1,27 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, Meta, Title } from '@angular/platform-browser';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
+import { ReviewService } from '../../services/review.service';
 import { Product } from '../../models/product.models';
+import { ProductReviewSummary } from '../../models/review.models';
 import { FRONTEND_BASE_URL, resolveImageUrl } from '../../config/api.config';
+import { extractApiErrorMessage } from '../../utils/api-error.util';
 
 @Component({
   selector: 'app-product-detail',
-  imports: [RouterLink, DecimalPipe, FormsModule],
+  imports: [RouterLink, DecimalPipe, DatePipe, FormsModule],
   templateUrl: './product-detail.html',
 })
 export class ProductDetail implements OnInit {
   private productService = inject(ProductService);
   private cartService = inject(CartService);
   private authService = inject(AuthService);
+  private reviewService = inject(ReviewService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private sanitizer = inject(DomSanitizer);
@@ -31,6 +35,24 @@ export class ProductDetail implements OnInit {
   addingToCart = signal(false);
   quantity = 1;
   selectedImageUrl = signal<string | null>(null);
+
+  reviews = signal<ProductReviewSummary | null>(null);
+  reviewsLoading = signal(false);
+  reviewMessage = signal('');
+  reviewSubmitting = signal(false);
+  reviewRating = 5;
+  reviewComment = '';
+  deletingReviewId = signal<number | null>(null);
+
+  isLoggedIn = this.authService.isLoggedIn;
+  isAdmin = this.authService.isAdmin;
+
+  hasOwnReview = computed(() =>
+    (this.reviews()?.items ?? []).some(r => r.isOwnReview)
+  );
+
+  starOptions = [1, 2, 3, 4, 5];
+  readonly Math = Math;
 
   galleryUrls = computed(() => {
     const p = this.product();
@@ -68,6 +90,7 @@ export class ProductDetail implements OnInit {
           this.selectedImageUrl.set(urls[0] ?? null);
           this.applySeo(p);
           this.loading.set(false);
+          this.loadReviews(slug);
         },
         error: () => {
           this.errorMessage.set('Ürün bulunamadı.');
@@ -79,6 +102,77 @@ export class ProductDetail implements OnInit {
 
   selectImage(url: string): void {
     this.selectedImageUrl.set(url);
+  }
+
+  loadReviews(slug: string): void {
+    this.reviewsLoading.set(true);
+    this.reviewService.getByProductSlug(slug).subscribe({
+      next: (summary) => {
+        this.reviews.set(summary);
+        this.reviewsLoading.set(false);
+      },
+      error: () => {
+        this.reviews.set({ averageRating: 0, totalCount: 0, items: [] });
+        this.reviewsLoading.set(false);
+      }
+    });
+  }
+
+  submitReview(): void {
+    const p = this.product();
+    if (!p) return;
+
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      return;
+    }
+
+    if (this.reviewComment.trim().length < 5) {
+      this.reviewMessage.set('Yorum en az 5 karakter olmalıdır.');
+      return;
+    }
+
+    this.reviewSubmitting.set(true);
+    this.reviewMessage.set('');
+
+    this.reviewService.create({
+      productId: p.id,
+      rating: this.reviewRating,
+      comment: this.reviewComment.trim()
+    }).subscribe({
+      next: () => {
+        this.reviewComment = '';
+        this.reviewRating = 5;
+        this.reviewMessage.set('Yorumunuz eklendi!');
+        this.reviewSubmitting.set(false);
+        this.loadReviews(p.slug);
+      },
+      error: (err) => {
+        this.reviewMessage.set(extractApiErrorMessage(err, 'Yorum eklenemedi.'));
+        this.reviewSubmitting.set(false);
+      }
+    });
+  }
+
+  deleteReview(reviewId: number): void {
+    const p = this.product();
+    if (!p || !confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+
+    this.deletingReviewId.set(reviewId);
+    this.reviewService.delete(reviewId).subscribe({
+      next: () => {
+        this.deletingReviewId.set(null);
+        this.loadReviews(p.slug);
+      },
+      error: (err) => {
+        this.reviewMessage.set(extractApiErrorMessage(err, 'Yorum silinemedi.'));
+        this.deletingReviewId.set(null);
+      }
+    });
+  }
+
+  starsArray(rating: number): boolean[] {
+    return [1, 2, 3, 4, 5].map(n => n <= rating);
   }
 
   addToCart(): void {

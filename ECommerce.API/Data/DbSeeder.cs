@@ -33,6 +33,7 @@ public static class DbSeeder
         await SeedProductsAsync(context);
         await EnsureSlugsAsync(context);
         await EnsureProductDetailsAsync(context);
+        await SeedReviewsAsync(context);
     }
 
     private static async Task SeedCategoriesAsync(AppDbContext context)
@@ -282,4 +283,67 @@ public static class DbSeeder
         <h3>Teslimat &amp; İade</h3>
         <p>Siparişleriniz 1-3 iş günü içinde kargoya verilir. Ürünü teslim aldıktan sonra 14 gün içinde iade edebilirsiniz.</p>
         """;
+
+    private static async Task SeedReviewsAsync(AppDbContext context)
+    {
+        var demoUser = await EnsureDemoUserAsync(context);
+
+        var products = await context.Products
+            .OrderBy(p => p.Id)
+            .ToListAsync();
+
+        var reviewedProductIds = await context.ProductReviews
+            .Select(r => r.ProductId)
+            .Distinct()
+            .ToListAsync();
+
+        var added = false;
+        foreach (var product in products)
+        {
+            if (reviewedProductIds.Contains(product.Id))
+                continue;
+
+            var rating = ((product.Id - 1) % 5) + 1;
+            context.ProductReviews.Add(new ProductReview
+            {
+                ProductId = product.Id,
+                UserId = demoUser.Id,
+                Rating = rating,
+                Comment = BuildReviewComment(product.Name, rating),
+                CreatedAt = DateTime.UtcNow.AddDays(-product.Id)
+            });
+            added = true;
+        }
+
+        if (added)
+            await context.SaveChangesAsync();
+    }
+
+    private static async Task<User> EnsureDemoUserAsync(AppDbContext context)
+    {
+        const string demoEmail = "demo@novashop.com";
+        var demoUser = await context.Users.FirstOrDefaultAsync(u => u.Email == demoEmail);
+        if (demoUser is not null)
+            return demoUser;
+
+        demoUser = new User
+        {
+            FullName = "Demo Müşteri",
+            Email = demoEmail,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Demo123!"),
+            Role = UserRole.Customer
+        };
+        context.Users.Add(demoUser);
+        await context.SaveChangesAsync();
+        return demoUser;
+    }
+
+    private static string BuildReviewComment(string productName, int rating) => rating switch
+    {
+        5 => $"{productName} beklentilerimin üzerinde çıktı. Kalite ve kargo hızından çok memnun kaldım.",
+        4 => $"{productName} genel olarak iyi bir ürün. Fiyat/performans dengesi tatmin edici.",
+        3 => $"{productName} idare eder seviyede. Ne çok iyi ne de kötü, ortalama bir deneyim.",
+        2 => $"{productName} tam beklediğim gibi değildi. Birkaç eksik noktası var.",
+        _ => $"{productName} maalesef beklentimi karşılamadı. Tekrar tercih etmem muhtemel değil."
+    };
 }
