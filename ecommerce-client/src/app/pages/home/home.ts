@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ProductService } from '../../services/product.service';
 import { CategoryService } from '../../services/category.service';
@@ -19,6 +19,7 @@ export class Home implements OnInit {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private searchTimeout?: ReturnType<typeof setTimeout>;
 
   products = signal<Product[]>([]);
@@ -27,7 +28,7 @@ export class Home implements OnInit {
   errorMessage = signal('');
 
   searchTerm = '';
-  selectedCategoryId: number | null = null;
+  selectedCategorySlug: string | null = null;
   currentPage = signal(1);
   pageSize = 12;
   totalCount = signal(0);
@@ -36,12 +37,13 @@ export class Home implements OnInit {
   resolveImageUrl = resolveImageUrl;
 
   ngOnInit(): void {
-    const categoryId = this.route.snapshot.queryParamMap.get('categoryId');
-    if (categoryId) {
-      this.selectedCategoryId = Number(categoryId);
-    }
     this.loadCategories();
-    this.loadProducts();
+
+    this.route.paramMap.subscribe(params => {
+      this.selectedCategorySlug = params.get('slug');
+      this.currentPage.set(1);
+      this.loadProducts();
+    });
   }
 
   loadCategories(): void {
@@ -58,10 +60,12 @@ export class Home implements OnInit {
     }, 400);
   }
 
-  selectCategory(categoryId: number | null): void {
-    this.selectedCategoryId = categoryId;
-    this.currentPage.set(1);
-    this.loadProducts();
+  selectCategory(slug: string | null): void {
+    if (slug) {
+      this.router.navigate(['/categories', slug]);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 
   goToPage(page: number): void {
@@ -77,7 +81,7 @@ export class Home implements OnInit {
 
     this.productService.getPaged({
       search: this.searchTerm,
-      categoryId: this.selectedCategoryId,
+      categorySlug: this.selectedCategorySlug,
       page: this.currentPage(),
       pageSize: this.pageSize,
     }).subscribe({

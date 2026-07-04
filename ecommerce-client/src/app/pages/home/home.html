@@ -45,14 +45,14 @@
 
       <div class="flex flex-wrap gap-2">
         <button type="button" (click)="selectCategory(null)"
-                [class]="selectedCategoryId === null
+                [class]="selectedCategorySlug === null
                   ? 'rounded-full bg-brand-600 px-4 py-1.5 text-sm font-semibold text-white shadow-md'
                   : 'rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-600 hover:border-brand-300 hover:text-brand-700'">
           Tümü
         </button>
         @for (cat of categories(); track cat.id) {
-          <button type="button" (click)="selectCategory(cat.id)"
-                  [class]="selectedCategoryId === cat.id
+          <button type="button" (click)="selectCategory(cat.slug)"
+                  [class]="selectedCategorySlug === cat.slug
                     ? 'rounded-full bg-brand-600 px-4 py-1.5 text-sm font-semibold text-white shadow-md'
                     : 'rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-600 hover:border-brand-300 hover:text-brand-700'">
             {{ cat.name }}
@@ -81,7 +81,7 @@
     } @else {
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         @for (p of products(); track p.id) {
-          <a [routerLink]="['/products', p.id]"
+          <a [routerLink]="['/products', p.slug]"
              class="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/5">
             <div class="aspect-square overflow-hidden bg-slate-100">
               @if (resolveImageUrl(p.imageUrl); as img) {

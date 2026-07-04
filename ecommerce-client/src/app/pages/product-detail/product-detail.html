@@ -1,11 +1,16 @@
-<div class="min-h-screen bg-surface-50 px-4 py-8 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-5xl">
-    <a routerLink="/" class="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800">
-      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-      </svg>
-      Mağazaya Dön
-    </a>
+<div class="min-h-screen bg-white">
+  <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+
+    <!-- Breadcrumb -->
+    <nav class="mb-6 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+      <a routerLink="/" class="hover:text-brand-600">Ana Sayfa</a>
+      @if (product(); as p) {
+        <span>/</span>
+        <a [routerLink]="['/categories', p.categorySlug]" class="hover:text-brand-600">{{ p.categoryName }}</a>
+        <span>/</span>
+        <span class="font-medium text-slate-800">{{ p.name }}</span>
+      }
+    </nav>
 
     @if (loading()) {
       <div class="flex items-center justify-center py-32 text-slate-400">Yükleniyor...</div>
@@ -15,14 +20,16 @@
         <a routerLink="/" class="btn-primary mt-4 inline-flex">Ana Sayfaya Dön</a>
       </div>
     } @else if (product(); as p) {
-      <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="grid gap-0 lg:grid-cols-2">
-          <!-- Resim -->
-          <div class="aspect-square bg-slate-100 lg:aspect-auto lg:min-h-[480px]">
-            @if (resolveImageUrl(p.imageUrl); as img) {
-              <img [src]="img" [alt]="p.name" class="h-full w-full object-cover" />
+
+      <!-- Üst bölüm: Sol görsel, sağ bilgi -->
+      <div class="grid gap-10 lg:grid-cols-2 lg:gap-16">
+        <!-- Sol: Galeri -->
+        <div>
+          <div class="aspect-square overflow-hidden rounded-2xl bg-slate-100">
+            @if (selectedImageUrl(); as img) {
+              <img [src]="img" [alt]="p.name" class="h-full w-full object-contain p-4" />
             } @else {
-              <div class="flex h-full min-h-[320px] items-center justify-center text-slate-300">
+              <div class="flex h-full items-center justify-center text-slate-300">
                 <svg class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
                 </svg>
@@ -30,43 +37,83 @@
             }
           </div>
 
-          <!-- Bilgiler -->
-          <div class="flex flex-col justify-center p-8 sm:p-10">
-            <span class="mb-3 inline-flex w-fit rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">{{ p.categoryName }}</span>
-            <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">{{ p.name }}</h1>
-
-            <p class="mt-4 text-3xl font-extrabold text-brand-600">{{ p.price | number:'1.2-2' }} ₺</p>
-
-            <div class="mt-4">
-              @if (p.stock > 0) {
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-700">
-                  <span class="h-2 w-2 rounded-full bg-green-500"></span>
-                  Stokta ({{ p.stock }} adet)
-                </span>
-              } @else {
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-600">
-                  Stok tükendi
-                </span>
+          @if (galleryUrls().length > 1) {
+            <div class="mt-4 flex gap-3 overflow-x-auto pb-1">
+              @for (url of galleryUrls(); track url) {
+                <button type="button" (click)="selectImage(url)"
+                        [class]="selectedImageUrl() === url
+                          ? 'ring-2 ring-brand-500 ring-offset-2'
+                          : 'opacity-70 hover:opacity-100'"
+                        class="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                  <img [src]="url" [alt]="p.name" class="h-full w-full object-cover" />
+                </button>
               }
             </div>
+          }
+        </div>
 
-            @if (p.description) {
-              <p class="mt-6 leading-relaxed text-slate-600">{{ p.description }}</p>
+        <!-- Sağ: Ürün bilgileri -->
+        <div class="flex flex-col">
+          <a [routerLink]="['/categories', p.categorySlug]"
+             class="mb-3 inline-flex w-fit text-sm font-semibold text-brand-600 hover:text-brand-700">
+            {{ p.categoryName }}
+          </a>
+
+          <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">{{ p.name }}</h1>
+
+          <div class="mt-6 flex items-baseline gap-3">
+            <span class="text-3xl font-extrabold text-brand-600 sm:text-4xl">{{ p.price | number:'1.2-2' }} ₺</span>
+            <span class="text-sm text-slate-400">KDV dahil</span>
+          </div>
+
+          <div class="mt-5">
+            @if (p.stock > 0) {
+              <div class="inline-flex items-center gap-2 rounded-lg bg-green-50 px-4 py-2 text-sm font-semibold text-green-700">
+                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                Stokta — {{ p.stock }} adet
+              </div>
+            } @else {
+              <div class="inline-flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-600">
+                Stok tükendi
+              </div>
             }
+          </div>
 
-            <div class="mt-8 flex flex-wrap gap-3">
-              <button type="button" disabled
-                      class="btn-primary !px-8 opacity-60 cursor-not-allowed"
-                      title="Sepet özelliği yakında">
-                Sepete Ekle (yakında)
-              </button>
-              <a routerLink="/" [queryParams]="{ categoryId: p.categoryId }" class="btn-secondary">
-                Benzer Ürünler
-              </a>
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <button type="button" disabled
+                    class="btn-primary flex-1 !py-3.5 opacity-60 cursor-not-allowed"
+                    title="Sepet özelliği yakında">
+              Sepete Ekle
+            </button>
+            <a [routerLink]="['/categories', p.categorySlug]" class="btn-secondary flex-1 !py-3.5 text-center">
+              Benzer Ürünler
+            </a>
+          </div>
+
+          <div class="mt-8 grid grid-cols-3 gap-4 border-t border-slate-100 pt-8 text-center text-xs text-slate-500 sm:text-sm">
+            <div>
+              <p class="font-bold text-slate-800">Hızlı Kargo</p>
+              <p class="mt-1">1-3 iş günü</p>
+            </div>
+            <div>
+              <p class="font-bold text-slate-800">Güvenli Ödeme</p>
+              <p class="mt-1">256-bit SSL</p>
+            </div>
+            <div>
+              <p class="font-bold text-slate-800">Kolay İade</p>
+              <p class="mt-1">14 gün içinde</p>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Alt bölüm: Açıklama -->
+      @if (safeDescription()) {
+        <section class="mt-16 border-t border-slate-200 pt-12">
+          <h2 class="mb-6 text-xl font-bold text-slate-900">Ürün Açıklaması</h2>
+          <div class="product-description max-w-4xl" [innerHTML]="safeDescription()"></div>
+        </section>
+      }
     }
   </div>
 </div>

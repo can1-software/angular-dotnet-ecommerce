@@ -21,15 +21,27 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> GetPaged(
         [FromQuery] string? search,
         [FromQuery] int? categoryId,
+        [FromQuery] string? categorySlug,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
-        var result = await _productService.GetPagedAsync(search, categoryId, page, pageSize);
+        var result = await _productService.GetPagedAsync(search, categoryId, categorySlug, page, pageSize);
         return Ok(result);
     }
 
     [AllowAnonymous]
-    [HttpGet("{id}")]
+    [HttpGet("slug/{slug}")]
+    public async Task<IActionResult> GetBySlug(string slug)
+    {
+        var product = await _productService.GetBySlugAsync(slug);
+        if (product is null)
+            return NotFound(new { message = "Ürün bulunamadı." });
+
+        return Ok(product);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         var product = await _productService.GetByIdAsync(id);
@@ -42,9 +54,9 @@ public class ProductsController : ControllerBase
     [Authorize(Roles = "Admin")]
     [HttpPost]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> Create([FromForm] CreateProductDto dto, IFormFile? image)
+    public async Task<IActionResult> Create([FromForm] CreateProductDto dto, IFormFile? image, List<IFormFile>? additionalImages)
     {
-        var result = await _productService.CreateAsync(dto, image);
+        var result = await _productService.CreateAsync(dto, image, additionalImages);
         if (!result.Success)
             return BadRequest(new { message = result.Message });
 
@@ -52,11 +64,11 @@ public class ProductsController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto, IFormFile? image)
+    public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto, IFormFile? image, List<IFormFile>? additionalImages)
     {
-        var result = await _productService.UpdateAsync(id, dto, image);
+        var result = await _productService.UpdateAsync(id, dto, image, additionalImages);
         if (!result.Success)
             return BadRequest(new { message = result.Message });
 
@@ -64,7 +76,7 @@ public class ProductsController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _productService.DeleteAsync(id);

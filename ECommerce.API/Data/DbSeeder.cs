@@ -1,4 +1,5 @@
 using ECommerce.API.Entities;
+using ECommerce.API.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.API.Data;
@@ -6,18 +7,15 @@ namespace ECommerce.API.Data;
 // Uygulama ilk açıldığında varsayılan admin kullanıcısını oluşturur.
 public static class DbSeeder
 {
-    // Varsayılan admin giriş bilgileri (geliştirme ortamı için).
     public const string AdminEmail = "admin@novashop.com";
     public const string AdminPassword = "Admin123!";
 
     public static async Task SeedAsync(AppDbContext context)
     {
-        // Eski kayıtlarda rol boşsa müşteri yap.
         await context.Users
             .Where(u => u.Role == "" || u.Role == null)
             .ExecuteUpdateAsync(s => s.SetProperty(u => u.Role, UserRole.Customer));
 
-        // Admin yoksa oluştur.
         var adminExists = await context.Users.AnyAsync(u => u.Email == AdminEmail);
         if (!adminExists)
         {
@@ -31,11 +29,10 @@ public static class DbSeeder
             await context.SaveChangesAsync();
         }
 
-        // Örnek kategoriler (geliştirme için 20 adet).
         await SeedCategoriesAsync(context);
-
-        // Örnek ürünler (geliştirme için 20 adet, resimli).
         await SeedProductsAsync(context);
+        await EnsureSlugsAsync(context);
+        await EnsureProductDetailsAsync(context);
     }
 
     private static async Task SeedCategoriesAsync(AppDbContext context)
@@ -68,15 +65,34 @@ public static class DbSeeder
             .Select(c => c.Name)
             .ToListAsync();
 
-        var toAdd = dummyCategories
-            .Where(c => !existingNames.Contains(c.Item1))
-            .Select(c => new Category
+        var existingSlugs = await context.Categories
+            .Select(c => c.Slug)
+            .ToListAsync();
+
+        var toAdd = new List<Category>();
+        foreach (var (name, description) in dummyCategories)
+        {
+            if (existingNames.Contains(name))
+                continue;
+
+            var slug = SlugHelper.Generate(name);
+            var uniqueSlug = slug;
+            var suffix = 2;
+            while (existingSlugs.Contains(uniqueSlug))
             {
-                Name = c.Item1,
-                Description = c.Item2,
+                uniqueSlug = $"{slug}-{suffix}";
+                suffix++;
+            }
+            existingSlugs.Add(uniqueSlug);
+
+            toAdd.Add(new Category
+            {
+                Name = name,
+                Slug = uniqueSlug,
+                Description = description,
                 CreatedAt = DateTime.UtcNow
-            })
-            .ToList();
+            });
+        }
 
         if (toAdd.Count == 0) return;
 
@@ -114,6 +130,10 @@ public static class DbSeeder
             .Select(p => p.Name)
             .ToListAsync();
 
+        var existingSlugs = await context.Products
+            .Select(p => p.Slug)
+            .ToListAsync();
+
         var categories = await context.Categories.ToDictionaryAsync(c => c.Name, c => c.Id);
 
         var toAdd = new List<Product>();
@@ -125,10 +145,24 @@ public static class DbSeeder
             if (!categories.TryGetValue(categoryName, out var categoryId))
                 continue;
 
+            var slug = SlugHelper.Generate(name);
+            var uniqueSlug = slug;
+            var suffix = 2;
+            while (existingSlugs.Contains(uniqueSlug))
+            {
+                uniqueSlug = $"{slug}-{suffix}";
+                suffix++;
+            }
+            existingSlugs.Add(uniqueSlug);
+
             toAdd.Add(new Product
             {
                 Name = name,
-                Description = description,
+                Slug = uniqueSlug,
+                Description = BuildHtmlDescription(name, description),
+                MetaTitle = $"{name} | NovaShop",
+                MetaDescription = $"{name} - {description}. NovaShop'ta uygun fiyat ve hızlı kargo.",
+                MetaKeywords = $"{name}, novashop, online alışveriş",
                 Price = price,
                 Stock = stock,
                 CategoryId = categoryId,
@@ -142,4 +176,110 @@ public static class DbSeeder
         context.Products.AddRange(toAdd);
         await context.SaveChangesAsync();
     }
+
+    private static async Task EnsureSlugsAsync(AppDbContext context)
+    {
+        var categories = await context.Categories.ToListAsync();
+        var categorySlugs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var category in categories.OrderBy(c => c.Id))
+        {
+            if (!NeedsSlug(category.Slug))
+            {
+                categorySlugs.Add(category.Slug);
+                continue;
+            }
+
+            category.Slug = await SlugHelper.GenerateUniqueAsync(
+                category.Name,
+                s => Task.FromResult(categorySlugs.Contains(s)));
+            categorySlugs.Add(category.Slug);
+        }
+
+        var products = await context.Products.ToListAsync();
+        var productSlugs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var product in products.OrderBy(p => p.Id))
+        {
+            if (!NeedsSlug(product.Slug))
+            {
+                productSlugs.Add(product.Slug);
+                continue;
+            }
+
+            product.Slug = await SlugHelper.GenerateUniqueAsync(
+                product.Name,
+                s => Task.FromResult(productSlugs.Contains(s)));
+            productSlugs.Add(product.Slug);
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private static bool NeedsSlug(string? slug) =>
+        string.IsNullOrWhiteSpace(slug) ||
+        slug.StartsWith("product-", StringComparison.OrdinalIgnoreCase) ||
+        slug.StartsWith("category-", StringComparison.OrdinalIgnoreCase);
+
+    private static async Task EnsureProductDetailsAsync(AppDbContext context)
+    {
+        var products = await context.Products.Include(p => p.Images).ToListAsync();
+
+        foreach (var product in products)
+        {
+            if (string.IsNullOrWhiteSpace(product.MetaTitle))
+                product.MetaTitle = $"{product.Name} | NovaShop";
+
+            if (string.IsNullOrWhiteSpace(product.MetaDescription))
+                product.MetaDescription = $"{product.Name} - NovaShop'ta en uygun fiyat ve hızlı kargo.";
+
+            if (string.IsNullOrWhiteSpace(product.MetaKeywords))
+                product.MetaKeywords = $"{product.Name}, novashop, e-ticaret";
+
+            if (string.IsNullOrWhiteSpace(product.Description) || !product.Description.Contains('<'))
+            {
+                var plain = product.Description ?? "Kaliteli ürün, hızlı teslimat.";
+                product.Description = BuildHtmlDescription(product.Name, plain);
+            }
+
+            if (product.Images.Count > 0) continue;
+
+            var sort = 0;
+            if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+            {
+                product.Images.Add(new ProductImage
+                {
+                    ImageUrl = product.ImageUrl,
+                    SortOrder = sort++
+                });
+            }
+
+            var productNum = ((product.Id - 1) % 20) + 1;
+            var alt1 = $"/uploads/products/seed/product-{((productNum % 20) + 1):D2}.jpg";
+            var alt2 = $"/uploads/products/seed/product-{((productNum + 7) % 20) + 1:D2}.jpg";
+
+            if (product.ImageUrl != alt1)
+                product.Images.Add(new ProductImage { ImageUrl = alt1, SortOrder = sort++ });
+
+            if (product.ImageUrl != alt2 && alt1 != alt2)
+                product.Images.Add(new ProductImage { ImageUrl = alt2, SortOrder = sort++ });
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private static string BuildHtmlDescription(string name, string summary) =>
+        $"""
+        <h2>{name}</h2>
+        <p>{summary}</p>
+        <h3>Ürün Avantajları</h3>
+        <ul>
+          <li>Orijinal ve garantili ürün</li>
+          <li>Hızlı kargo seçeneği</li>
+          <li>14 gün koşulsuz iade</li>
+          <li>7/24 müşteri desteği</li>
+        </ul>
+        <h3>Teslimat &amp; İade</h3>
+        <p>Siparişleriniz 1-3 iş günü içinde kargoya verilir. Ürünü teslim aldıktan sonra 14 gün içinde iade edebilirsiniz.</p>
+        """;
 }

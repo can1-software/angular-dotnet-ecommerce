@@ -1,6 +1,7 @@
 using ECommerce.API.Data;
 using ECommerce.API.DTOs;
 using ECommerce.API.Entities;
+using ECommerce.API.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.API.Services;
@@ -16,18 +17,17 @@ public class CategoryService : ICategoryService
 
     public async Task<PagedResultDto<CategoryDto>> GetPagedAsync(string? search, int page, int pageSize)
     {
-        // Geçersiz değerleri düzelt.
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 1 ? 10 : Math.Min(pageSize, 50);
 
         var query = _context.Categories.AsQueryable();
 
-        // Arama: isim veya açıklamada geçen metin.
         if (!string.IsNullOrWhiteSpace(search))
         {
             var term = search.Trim().ToLower();
             query = query.Where(c =>
                 c.Name.ToLower().Contains(term) ||
+                c.Slug.ToLower().Contains(term) ||
                 (c.Description != null && c.Description.ToLower().Contains(term)));
         }
 
@@ -57,15 +57,28 @@ public class CategoryService : ICategoryService
         return category is null ? null : ToDto(category);
     }
 
+    public async Task<CategoryDto?> GetBySlugAsync(string slug)
+    {
+        var category = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Slug == slug);
+
+        return category is null ? null : ToDto(category);
+    }
+
     public async Task<(bool Success, string Message, CategoryDto? Data)> CreateAsync(CreateCategoryDto dto)
     {
         var exists = await _context.Categories.AnyAsync(c => c.Name == dto.Name);
         if (exists)
             return (false, "Bu isimde bir kategori zaten var.", null);
 
+        var slug = await SlugHelper.GenerateUniqueAsync(
+            dto.Name,
+            s => _context.Categories.AnyAsync(c => c.Slug == s));
+
         var category = new Category
         {
             Name = dto.Name.Trim(),
+            Slug = slug,
             Description = dto.Description?.Trim()
         };
 
@@ -85,8 +98,17 @@ public class CategoryService : ICategoryService
         if (nameTaken)
             return (false, "Bu isimde başka bir kategori var.", null);
 
+        var nameChanged = category.Name != dto.Name.Trim();
         category.Name = dto.Name.Trim();
         category.Description = dto.Description?.Trim();
+
+        if (nameChanged)
+        {
+            category.Slug = await SlugHelper.GenerateUniqueAsync(
+                category.Name,
+                s => _context.Categories.AnyAsync(c => c.Slug == s && c.Id != id));
+        }
+
         await _context.SaveChangesAsync();
 
         return (true, "Kategori güncellendi.", ToDto(category));
@@ -108,6 +130,7 @@ public class CategoryService : ICategoryService
     {
         Id = c.Id,
         Name = c.Name,
+        Slug = c.Slug,
         Description = c.Description,
         CreatedAt = c.CreatedAt
     };

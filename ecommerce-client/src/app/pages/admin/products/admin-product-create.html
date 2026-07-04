@@ -1,4 +1,4 @@
-<div class="max-w-xl">
+<div class="max-w-4xl">
   <a routerLink="/admin/products" class="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800">
     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -13,51 +13,90 @@
       <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ errorMessage() }}</div>
     }
 
-    <form (ngSubmit)="onSubmit()" class="space-y-5">
-      <div>
-        <label class="label-field" for="name">Ürün Adı</label>
-        <input id="name" type="text" name="name" [(ngModel)]="name" required class="input-field" placeholder="Örn: iPhone 15" />
-      </div>
-
-      <div>
-        <label class="label-field" for="description">Açıklama</label>
-        <textarea id="description" name="description" [(ngModel)]="description" rows="3"
-                  class="input-field resize-none" placeholder="Ürün açıklaması"></textarea>
-      </div>
-
-      <div class="grid gap-4 sm:grid-cols-2">
+    <form (ngSubmit)="onSubmit()" class="space-y-8">
+      <!-- Temel Bilgiler -->
+      <section class="space-y-5">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-slate-500">Temel Bilgiler</h3>
         <div>
-          <label class="label-field" for="price">Fiyat (₺)</label>
-          <input id="price" type="number" name="price" [(ngModel)]="price" required min="0.01" step="0.01" class="input-field" />
+          <label class="label-field" for="name">Ürün Adı</label>
+          <input id="name" type="text" name="name" [(ngModel)]="name" required class="input-field" placeholder="Örn: iPhone 15" />
         </div>
-        <div>
-          <label class="label-field" for="stock">Stok</label>
-          <input id="stock" type="number" name="stock" [(ngModel)]="stock" required min="0" class="input-field" />
-        </div>
-      </div>
-
-      <div>
-        <label class="label-field" for="categoryId">Kategori</label>
-        <select id="categoryId" name="categoryId" [(ngModel)]="categoryId" required class="input-field">
-          <option [ngValue]="null" disabled>Kategori seçin</option>
-          @for (cat of categories(); track cat.id) {
-            <option [ngValue]="cat.id">{{ cat.name }}</option>
-          }
-        </select>
-      </div>
-
-      <div>
-        <label class="label-field" for="image">Ürün Resmi</label>
-        <input id="image" type="file" accept="image/jpeg,image/png,image/webp"
-               (change)="onImageSelected($event)" class="input-field !py-2 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand-700" />
-        <p class="mt-1 text-xs text-slate-500">JPG, PNG veya WEBP — en fazla 5 MB</p>
-        @if (imagePreview()) {
-          <div class="mt-3 flex items-start gap-3">
-            <img [src]="imagePreview()" alt="Önizleme" class="h-24 w-24 rounded-xl border border-slate-200 object-cover" />
-            <button type="button" (click)="clearImage()" class="text-sm font-medium text-red-600 hover:text-red-700">Resmi kaldır</button>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="label-field" for="price">Fiyat (₺)</label>
+            <input id="price" type="number" name="price" [(ngModel)]="price" required min="0.01" step="0.01" class="input-field" />
           </div>
-        }
-      </div>
+          <div>
+            <label class="label-field" for="stock">Stok</label>
+            <input id="stock" type="number" name="stock" [(ngModel)]="stock" required min="0" class="input-field" />
+          </div>
+        </div>
+        <div>
+          <label class="label-field" for="categoryId">Kategori</label>
+          <select id="categoryId" name="categoryId" [(ngModel)]="categoryId" required class="input-field">
+            <option [ngValue]="null" disabled>Kategori seçin</option>
+            @for (cat of categories(); track cat.id) {
+              <option [ngValue]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+      </section>
+
+      <!-- Açıklama -->
+      <section class="space-y-3">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-slate-500">Ürün Açıklaması</h3>
+        <quill-editor [(ngModel)]="description" name="description" [modules]="editorModules"
+                      placeholder="Detaylı ürün açıklaması yazın..."></quill-editor>
+      </section>
+
+      <!-- SEO -->
+      <section class="space-y-5 rounded-xl border border-slate-100 bg-slate-50 p-5">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-slate-500">SEO Ayarları</h3>
+        <div>
+          <label class="label-field" for="metaTitle">Meta Başlık</label>
+          <input id="metaTitle" type="text" name="metaTitle" [(ngModel)]="metaTitle" class="input-field"
+                 placeholder="Google'da görünecek başlık (boş bırakılırsa ürün adı kullanılır)" />
+        </div>
+        <div>
+          <label class="label-field" for="metaDescription">Meta Açıklama</label>
+          <textarea id="metaDescription" name="metaDescription" [(ngModel)]="metaDescription" rows="2"
+                    class="input-field resize-none" placeholder="Arama sonuçlarında görünen kısa açıklama (max 160 karakter önerilir)"></textarea>
+        </div>
+        <div>
+          <label class="label-field" for="metaKeywords">Anahtar Kelimeler</label>
+          <input id="metaKeywords" type="text" name="metaKeywords" [(ngModel)]="metaKeywords" class="input-field"
+                 placeholder="telefon, akıllı telefon, samsung (virgülle ayırın)" />
+        </div>
+      </section>
+
+      <!-- Görseller -->
+      <section class="space-y-5">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-slate-500">Görseller</h3>
+        <div>
+          <label class="label-field" for="image">Ana Görsel</label>
+          <input id="image" type="file" accept="image/jpeg,image/png,image/webp"
+                 (change)="onImageSelected($event)" class="input-field !py-2 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand-700" />
+          @if (imagePreview()) {
+            <div class="mt-3 flex items-start gap-3">
+              <img [src]="imagePreview()" alt="Önizleme" class="h-24 w-24 rounded-xl border border-slate-200 object-cover" />
+              <button type="button" (click)="clearImage()" class="text-sm font-medium text-red-600 hover:text-red-700">Kaldır</button>
+            </div>
+          }
+        </div>
+        <div>
+          <label class="label-field" for="additionalImages">Ek Görseller</label>
+          <input id="additionalImages" type="file" accept="image/jpeg,image/png,image/webp" multiple
+                 (change)="onAdditionalImagesSelected($event)" class="input-field !py-2 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand-700" />
+          <p class="mt-1 text-xs text-slate-500">Birden fazla görsel seçebilirsiniz. Ürün detayında galeri olarak görünür.</p>
+          @if (additionalPreviews().length) {
+            <div class="mt-3 flex flex-wrap gap-2">
+              @for (preview of additionalPreviews(); track preview) {
+                <img [src]="preview" alt="Ek görsel" class="h-16 w-16 rounded-lg border border-slate-200 object-cover" />
+              }
+            </div>
+          }
+        </div>
+      </section>
 
       <div class="flex gap-3 pt-2">
         <button type="submit" [disabled]="loading()" class="btn-primary">

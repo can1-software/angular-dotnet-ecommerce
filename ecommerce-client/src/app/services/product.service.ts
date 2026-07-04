@@ -23,7 +23,9 @@ export class ProductService {
       params = params.set('search', query.search.trim());
     }
 
-    if (query.categoryId) {
+    if (query.categorySlug) {
+      params = params.set('categorySlug', query.categorySlug);
+    } else if (query.categoryId) {
       params = params.set('categoryId', String(query.categoryId));
     }
 
@@ -32,6 +34,10 @@ export class ProductService {
 
   getById(id: number): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/${id}`);
+  }
+
+  getBySlug(slug: string): Observable<Product> {
+    return this.http.get<Product>(`${this.apiUrl}/slug/${slug}`);
   }
 
   create(data: CreateProductRequest): Observable<Product> {
@@ -49,15 +55,15 @@ export class ProductService {
   private toFormData(data: CreateProductRequest | UpdateProductRequest): FormData {
     const formData = new FormData();
     formData.append('name', data.name);
-    if (data.description) {
-      formData.append('description', data.description);
-    }
+    if (data.description) formData.append('description', data.description);
+    if (data.metaTitle) formData.append('metaTitle', data.metaTitle);
+    if (data.metaDescription) formData.append('metaDescription', data.metaDescription);
+    if (data.metaKeywords) formData.append('metaKeywords', data.metaKeywords);
     formData.append('price', String(data.price));
     formData.append('stock', String(data.stock));
     formData.append('categoryId', String(data.categoryId));
-    if (data.image) {
-      formData.append('image', data.image);
-    }
+    if (data.image) formData.append('image', data.image);
+    data.additionalImages?.forEach(file => formData.append('additionalImages', file));
     return formData;
   }
 }

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "quill/dist/quill.snow.css";
 
 /* Özel tasarım token'ları */
 @theme {
@@ -56,5 +57,37 @@
 
   .card-glass {
     @apply rounded-2xl border border-white/60 bg-white/80 shadow-xl shadow-slate-900/5 backdrop-blur-xl;
+  }
+
+  .product-description {
+    @apply text-slate-700 leading-relaxed;
+  }
+
+  .product-description h2 {
+    @apply mb-3 text-xl font-bold text-slate-900;
+  }
+
+  .product-description h3 {
+    @apply mb-2 mt-5 text-lg font-semibold text-slate-900;
+  }
+
+  .product-description p {
+    @apply mb-3;
+  }
+
+  .product-description ul {
+    @apply mb-4 list-disc space-y-1 pl-5;
+  }
+
+  .product-description li {
+    @apply text-slate-600;
+  }
+
+  .ql-container {
+    @apply rounded-b-xl border border-slate-200 bg-white text-sm;
+  }
+
+  .ql-toolbar {
+    @apply rounded-t-xl border border-b-0 border-slate-200 bg-slate-50;
   }
 }

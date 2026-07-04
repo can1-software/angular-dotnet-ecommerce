@@ -28,7 +28,18 @@ public class CategoriesController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("{id}")]
+    [HttpGet("slug/{slug}")]
+    public async Task<IActionResult> GetBySlug(string slug)
+    {
+        var category = await _categoryService.GetBySlugAsync(slug);
+        if (category is null)
+            return NotFound(new { message = "Kategori bulunamadı." });
+
+        return Ok(category);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         var category = await _categoryService.GetByIdAsync(id);
@@ -50,7 +61,7 @@ public class CategoriesController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateCategoryDto dto)
     {
         var result = await _categoryService.UpdateAsync(id, dto);
@@ -61,7 +72,7 @@ public class CategoriesController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _categoryService.DeleteAsync(id);
