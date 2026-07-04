@@ -38,9 +38,10 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateProductDto dto)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Create([FromForm] CreateProductDto dto, IFormFile? image)
     {
-        var result = await _productService.CreateAsync(dto);
+        var result = await _productService.CreateAsync(dto, image);
         if (!result.Success)
             return BadRequest(new { message = result.Message });
 
@@ -48,9 +49,10 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateProductDto dto)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto, IFormFile? image)
     {
-        var result = await _productService.UpdateAsync(id, dto);
+        var result = await _productService.UpdateAsync(id, dto, image);
         if (!result.Success)
             return BadRequest(new { message = result.Message });
 

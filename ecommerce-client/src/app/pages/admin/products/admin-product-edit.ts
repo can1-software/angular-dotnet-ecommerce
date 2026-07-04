@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CategoryService } from '../../../services/category.service';
 import { ProductService } from '../../../services/product.service';
 import { Category } from '../../../models/category.models';
+import { resolveImageUrl } from '../../../config/api.config';
 
 @Component({
   selector: 'app-admin-product-edit',
@@ -23,6 +24,9 @@ export class AdminProductEdit implements OnInit {
   price: number | null = null;
   stock: number | null = null;
   categoryId: number | null = null;
+  currentImageUrl = signal<string | null>(null);
+  selectedImage: File | null = null;
+  imagePreview = signal<string | null>(null);
   errorMessage = signal('');
   loading = signal(false);
   pageLoading = signal(true);
@@ -41,6 +45,7 @@ export class AdminProductEdit implements OnInit {
         this.price = p.price;
         this.stock = p.stock;
         this.categoryId = p.categoryId;
+        this.currentImageUrl.set(resolveImageUrl(p.imageUrl));
         this.pageLoading.set(false);
       },
       error: () => {
@@ -48,6 +53,22 @@ export class AdminProductEdit implements OnInit {
         this.pageLoading.set(false);
       }
     });
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.selectedImage = file;
+    const reader = new FileReader();
+    reader.onload = () => this.imagePreview.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  clearNewImage(): void {
+    this.selectedImage = null;
+    this.imagePreview.set(null);
   }
 
   onSubmit(): void {
@@ -62,6 +83,7 @@ export class AdminProductEdit implements OnInit {
       price: this.price,
       stock: this.stock,
       categoryId: this.categoryId,
+      image: this.selectedImage ?? undefined,
     }).subscribe({
       next: () => {
         this.router.navigate(['/admin/products'], { state: { message: 'Ürün güncellendi.' } });

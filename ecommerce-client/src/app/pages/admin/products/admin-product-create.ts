@@ -21,6 +21,8 @@ export class AdminProductCreate implements OnInit {
   price: number | null = null;
   stock: number | null = null;
   categoryId: number | null = null;
+  selectedImage: File | null = null;
+  imagePreview = signal<string | null>(null);
   errorMessage = signal('');
   loading = signal(false);
 
@@ -29,6 +31,22 @@ export class AdminProductCreate implements OnInit {
       next: (r) => this.categories.set(r.items),
       error: () => this.errorMessage.set('Kategoriler yüklenemedi.')
     });
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.selectedImage = file;
+    const reader = new FileReader();
+    reader.onload = () => this.imagePreview.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  clearImage(): void {
+    this.selectedImage = null;
+    this.imagePreview.set(null);
   }
 
   onSubmit(): void {
@@ -43,6 +61,7 @@ export class AdminProductCreate implements OnInit {
       price: this.price,
       stock: this.stock,
       categoryId: this.categoryId,
+      image: this.selectedImage ?? undefined,
     }).subscribe({
       next: () => {
         this.router.navigate(['/admin/products'], { state: { message: 'Ürün başarıyla eklendi.' } });

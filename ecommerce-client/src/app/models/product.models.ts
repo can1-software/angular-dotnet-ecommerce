@@ -6,6 +6,7 @@ export interface Product {
   stock: number;
   categoryId: number;
   categoryName: string;
+  imageUrl?: string;
   createdAt: string;
 }
 
@@ -15,6 +16,7 @@ export interface CreateProductRequest {
   price: number;
   stock: number;
   categoryId: number;
+  image?: File;
 }
 
 export interface UpdateProductRequest {
@@ -23,6 +25,7 @@ export interface UpdateProductRequest {
   price: number;
   stock: number;
   categoryId: number;
+  image?: File;
 }
 
 export interface PagedProductResult {

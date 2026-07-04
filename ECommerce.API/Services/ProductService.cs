@@ -8,10 +8,12 @@ namespace ECommerce.API.Services;
 public class ProductService : IProductService
 {
     private readonly AppDbContext _context;
+    private readonly IFileStorageService _fileStorage;
 
-    public ProductService(AppDbContext context)
+    public ProductService(AppDbContext context, IFileStorageService fileStorage)
     {
         _context = context;
+        _fileStorage = fileStorage;
     }
 
     public async Task<PagedResultDto<ProductDto>> GetPagedAsync(string? search, int page, int pageSize)
@@ -61,11 +63,22 @@ public class ProductService : IProductService
         return product is null ? null : ToDto(product);
     }
 
-    public async Task<(bool Success, string Message, ProductDto? Data)> CreateAsync(CreateProductDto dto)
+    public async Task<(bool Success, string Message, ProductDto? Data)> CreateAsync(CreateProductDto dto, IFormFile? image)
     {
         var categoryExists = await _context.Categories.AnyAsync(c => c.Id == dto.CategoryId);
         if (!categoryExists)
             return (false, "Seçilen kategori bulunamadı.", null);
+
+        string? imageUrl = null;
+        try
+        {
+            if (image is not null)
+                imageUrl = await _fileStorage.SaveProductImageAsync(image);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return (false, ex.Message, null);
+        }
 
         var product = new Product
         {
@@ -73,7 +86,8 @@ public class ProductService : IProductService
             Description = dto.Description?.Trim(),
             Price = dto.Price,
             Stock = dto.Stock,
-            CategoryId = dto.CategoryId
+            CategoryId = dto.CategoryId,
+            ImageUrl = imageUrl
         };
 
         _context.Products.Add(product);
@@ -83,7 +97,7 @@ public class ProductService : IProductService
         return (true, "Ürün oluşturuldu.", ToDto(product));
     }
 
-    public async Task<(bool Success, string Message, ProductDto? Data)> UpdateAsync(int id, UpdateProductDto dto)
+    public async Task<(bool Success, string Message, ProductDto? Data)> UpdateAsync(int id, UpdateProductDto dto, IFormFile? image)
     {
         var product = await _context.Products
             .Include(p => p.Category)
@@ -95,6 +109,20 @@ public class ProductService : IProductService
         var categoryExists = await _context.Categories.AnyAsync(c => c.Id == dto.CategoryId);
         if (!categoryExists)
             return (false, "Seçilen kategori bulunamadı.", null);
+
+        if (image is not null)
+        {
+            try
+            {
+                var newImageUrl = await _fileStorage.SaveProductImageAsync(image);
+                _fileStorage.DeleteProductImageIfExists(product.ImageUrl);
+                product.ImageUrl = newImageUrl;
+            }
+            catch (InvalidOperationException ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
 
         product.Name = dto.Name.Trim();
         product.Description = dto.Description?.Trim();
@@ -114,6 +142,7 @@ public class ProductService : IProductService
         if (product is null)
             return (false, "Ürün bulunamadı.");
 
+        _fileStorage.DeleteProductImageIfExists(product.ImageUrl);
         _context.Products.Remove(product);
         await _context.SaveChangesAsync();
 
@@ -129,6 +158,7 @@ public class ProductService : IProductService
         Stock = p.Stock,
         CategoryId = p.CategoryId,
         CategoryName = p.Category?.Name ?? string.Empty,
+        ImageUrl = p.ImageUrl,
         CreatedAt = p.CreatedAt
     };
 }

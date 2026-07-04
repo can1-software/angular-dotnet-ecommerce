@@ -31,14 +31,29 @@ export class ProductService {
   }
 
   create(data: CreateProductRequest): Observable<Product> {
-    return this.http.post<Product>(this.apiUrl, data);
+    return this.http.post<Product>(this.apiUrl, this.toFormData(data));
   }
 
   update(id: number, data: UpdateProductRequest): Observable<Product> {
-    return this.http.put<Product>(`${this.apiUrl}/${id}`, data);
+    return this.http.put<Product>(`${this.apiUrl}/${id}`, this.toFormData(data));
   }
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  private toFormData(data: CreateProductRequest | UpdateProductRequest): FormData {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    if (data.description) {
+      formData.append('description', data.description);
+    }
+    formData.append('price', String(data.price));
+    formData.append('stock', String(data.stock));
+    formData.append('categoryId', String(data.categoryId));
+    if (data.image) {
+      formData.append('image', data.image);
+    }
+    return formData;
   }
 }

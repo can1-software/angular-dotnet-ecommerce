@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ProductService } from '../../../services/product.service';
 import { Product } from '../../../models/product.models';
+import { resolveImageUrl } from '../../../config/api.config';
 
 @Component({
   selector: 'app-admin-products',
@@ -24,6 +25,8 @@ export class AdminProducts implements OnInit {
   pageSize = signal(10);
   totalCount = signal(0);
   totalPages = signal(0);
+
+  resolveImageUrl = resolveImageUrl;
 
   ngOnInit(): void {
     const msg = history.state?.['message'];

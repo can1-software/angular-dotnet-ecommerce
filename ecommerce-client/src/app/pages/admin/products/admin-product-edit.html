@@ -47,6 +47,25 @@
           </select>
         </div>
 
+        <div>
+          <label class="label-field" for="image">Ürün Resmi</label>
+          @if (currentImageUrl() && !imagePreview()) {
+            <div class="mb-3">
+              <p class="mb-2 text-xs text-slate-500">Mevcut resim</p>
+              <img [src]="currentImageUrl()" [alt]="name" class="h-28 w-28 rounded-xl border border-slate-200 object-cover" />
+            </div>
+          }
+          <input id="image" type="file" accept="image/jpeg,image/png,image/webp"
+                 (change)="onImageSelected($event)" class="input-field !py-2 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand-700" />
+          <p class="mt-1 text-xs text-slate-500">Yeni resim seçmezseniz mevcut resim korunur.</p>
+          @if (imagePreview()) {
+            <div class="mt-3 flex items-start gap-3">
+              <img [src]="imagePreview()" alt="Yeni önizleme" class="h-24 w-24 rounded-xl border border-slate-200 object-cover" />
+              <button type="button" (click)="clearNewImage()" class="text-sm font-medium text-red-600 hover:text-red-700">Yeni resmi iptal et</button>
+            </div>
+          }
+        </div>
+
         <div class="flex gap-3 pt-2">
           <button type="submit" [disabled]="loading()" class="btn-primary">
             @if (loading()) { Kaydediliyor... } @else { Güncelle }
