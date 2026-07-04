@@ -4,6 +4,8 @@ using ECommerce.API.Data;
 
 using ECommerce.API.Services;
 
+using Microsoft.AspNetCore.Mvc;
+
 using Microsoft.EntityFrameworkCore;
 
 using Microsoft.IdentityModel.Tokens;
@@ -22,7 +24,24 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var messages = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .SelectMany(e => e.Value!.Errors.Select(err => err.ErrorMessage))
+                .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                .ToList();
+
+            var message = messages.Count > 0
+                ? string.Join(" ", messages)
+                : "Gönderilen form bilgileri geçersiz.";
+
+            return new BadRequestObjectResult(new { message });
+        };
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 

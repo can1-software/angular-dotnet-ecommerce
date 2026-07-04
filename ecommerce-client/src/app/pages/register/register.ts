@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { extractApiErrorMessage } from '../../utils/api-error.util';
 
 // Kayıt sayfası (adres: "/register").
 @Component({
@@ -31,7 +32,7 @@ export class Register {
         // Kayıt başarılı: otomatik giriş yapılmış olur, ana sayfaya git.
         next: () => this.router.navigate(['/']),
         error: (err) => {
-          this.errorMessage.set(err.error?.message ?? 'Kayıt yapılamadı. Bilgileri kontrol et.');
+          this.errorMessage.set(extractApiErrorMessage(err, 'Kayıt yapılamadı.'));
           this.loading.set(false);
         }
       });

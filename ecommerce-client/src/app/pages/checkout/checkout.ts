@@ -6,6 +6,7 @@ import { CartService } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { AuthService } from '../../services/auth.service';
 import { Cart } from '../../models/cart.models';
+import { extractApiErrorMessage } from '../../utils/api-error.util';
 
 @Component({
   selector: 'app-checkout',
@@ -60,7 +61,7 @@ export class Checkout implements OnInit {
         this.router.navigate(['/orders', order.id], { state: { message: 'Siparişiniz başarıyla oluşturuldu!' } });
       },
       error: (err) => {
-        this.errorMessage.set(err.error?.message ?? 'Sipariş oluşturulamadı.');
+        this.errorMessage.set(extractApiErrorMessage(err, 'Sipariş oluşturulamadı.'));
         this.submitting.set(false);
       }
     });

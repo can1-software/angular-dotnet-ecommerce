@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
+import { extractApiErrorMessage } from '../../utils/api-error.util';
 
 @Component({
   selector: 'app-login',
@@ -31,7 +32,7 @@ export class Login {
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {
-        this.errorMessage.set(err.error?.message ?? 'Giriş yapılamadı. Bilgileri kontrol et.');
+        this.errorMessage.set(extractApiErrorMessage(err, 'Giriş yapılamadı.'));
         this.loading.set(false);
       }
     });

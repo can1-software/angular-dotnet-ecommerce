@@ -64,6 +64,7 @@ public class OrderService : IOrderService
             }
 
             order.TotalAmount = total;
+            order.OrderNumber = $"NS-{DateTime.UtcNow:yyyyMMddHHmmss}-{userId}";
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
@@ -78,10 +79,10 @@ public class OrderService : IOrderService
 
             return (true, "Siparişiniz alındı.", ToDto(order));
         }
-        catch
+        catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw;
+            return (false, $"Sipariş oluşturulamadı: {ex.InnerException?.Message ?? ex.Message}", null);
         }
     }
 
