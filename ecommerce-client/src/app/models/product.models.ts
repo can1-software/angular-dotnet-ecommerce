@@ -38,6 +38,7 @@ export interface PagedProductResult {
 
 export interface ProductQuery {
   search?: string;
+  categoryId?: number | null;
   page?: number;
   pageSize?: number;
 }

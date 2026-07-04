@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers;
 
-[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
@@ -17,16 +16,19 @@ public class ProductsController : ControllerBase
         _productService = productService;
     }
 
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetPaged(
         [FromQuery] string? search,
+        [FromQuery] int? categoryId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
-        var result = await _productService.GetPagedAsync(search, page, pageSize);
+        var result = await _productService.GetPagedAsync(search, categoryId, page, pageSize);
         return Ok(result);
     }
 
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -37,6 +39,7 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Create([FromForm] CreateProductDto dto, IFormFile? image)
@@ -48,6 +51,7 @@ public class ProductsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto dto, IFormFile? image)
@@ -59,6 +63,7 @@ public class ProductsController : ControllerBase
         return Ok(result.Data);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

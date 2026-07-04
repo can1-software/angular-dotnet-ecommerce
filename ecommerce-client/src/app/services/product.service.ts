@@ -23,6 +23,10 @@ export class ProductService {
       params = params.set('search', query.search.trim());
     }
 
+    if (query.categoryId) {
+      params = params.set('categoryId', String(query.categoryId));
+    }
+
     return this.http.get<PagedProductResult>(this.apiUrl, { params });
   }
 

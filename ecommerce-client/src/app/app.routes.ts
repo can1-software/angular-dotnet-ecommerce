@@ -10,6 +10,7 @@ import { AdminCategoryEdit } from './pages/admin/categories/admin-category-edit'
 import { AdminProducts } from './pages/admin/products/admin-products';
 import { AdminProductCreate } from './pages/admin/products/admin-product-create';
 import { AdminProductEdit } from './pages/admin/products/admin-product-edit';
+import { ProductDetail } from './pages/product-detail/product-detail';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
@@ -18,6 +19,7 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: '', component: Home },
+      { path: 'products/:id', component: ProductDetail },
       { path: 'login', component: Login },
       { path: 'register', component: Register },
     ]

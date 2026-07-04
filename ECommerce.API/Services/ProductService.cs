@@ -16,7 +16,7 @@ public class ProductService : IProductService
         _fileStorage = fileStorage;
     }
 
-    public async Task<PagedResultDto<ProductDto>> GetPagedAsync(string? search, int page, int pageSize)
+    public async Task<PagedResultDto<ProductDto>> GetPagedAsync(string? search, int? categoryId, int page, int pageSize)
     {
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 1 ? 10 : Math.Min(pageSize, 50);
@@ -24,6 +24,9 @@ public class ProductService : IProductService
         var query = _context.Products
             .Include(p => p.Category)
             .AsQueryable();
+
+        if (categoryId is > 0)
+            query = query.Where(p => p.CategoryId == categoryId);
 
         if (!string.IsNullOrWhiteSpace(search))
         {

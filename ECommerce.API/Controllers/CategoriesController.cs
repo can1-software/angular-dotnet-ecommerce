@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers;
 
-// Sadece Admin rolündeki kullanıcılar erişebilir.
-[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/[controller]")]
 public class CategoriesController : ControllerBase
@@ -18,7 +16,7 @@ public class CategoriesController : ControllerBase
         _categoryService = categoryService;
     }
 
-    // GET /api/categories?search=elek&page=1&pageSize=10
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetPaged(
         [FromQuery] string? search,
@@ -29,7 +27,7 @@ public class CategoriesController : ControllerBase
         return Ok(result);
     }
 
-    // GET /api/categories/5
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -40,7 +38,7 @@ public class CategoriesController : ControllerBase
         return Ok(category);
     }
 
-    // POST /api/categories
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateCategoryDto dto)
     {
@@ -51,7 +49,7 @@ public class CategoriesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
     }
 
-    // PUT /api/categories/5
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, UpdateCategoryDto dto)
     {
@@ -62,7 +60,7 @@ public class CategoriesController : ControllerBase
         return Ok(result.Data);
     }
 
-    // DELETE /api/categories/5
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

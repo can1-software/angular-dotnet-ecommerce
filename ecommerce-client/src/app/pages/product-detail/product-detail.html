@@ -1,0 +1,72 @@
+<div class="min-h-screen bg-surface-50 px-4 py-8 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-5xl">
+    <a routerLink="/" class="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+      </svg>
+      Mağazaya Dön
+    </a>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center py-32 text-slate-400">Yükleniyor...</div>
+    } @else if (errorMessage()) {
+      <div class="rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center">
+        <p class="text-red-700">{{ errorMessage() }}</p>
+        <a routerLink="/" class="btn-primary mt-4 inline-flex">Ana Sayfaya Dön</a>
+      </div>
+    } @else if (product(); as p) {
+      <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="grid gap-0 lg:grid-cols-2">
+          <!-- Resim -->
+          <div class="aspect-square bg-slate-100 lg:aspect-auto lg:min-h-[480px]">
+            @if (resolveImageUrl(p.imageUrl); as img) {
+              <img [src]="img" [alt]="p.name" class="h-full w-full object-cover" />
+            } @else {
+              <div class="flex h-full min-h-[320px] items-center justify-center text-slate-300">
+                <svg class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                </svg>
+              </div>
+            }
+          </div>
+
+          <!-- Bilgiler -->
+          <div class="flex flex-col justify-center p-8 sm:p-10">
+            <span class="mb-3 inline-flex w-fit rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">{{ p.categoryName }}</span>
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">{{ p.name }}</h1>
+
+            <p class="mt-4 text-3xl font-extrabold text-brand-600">{{ p.price | number:'1.2-2' }} ₺</p>
+
+            <div class="mt-4">
+              @if (p.stock > 0) {
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-700">
+                  <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                  Stokta ({{ p.stock }} adet)
+                </span>
+              } @else {
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-600">
+                  Stok tükendi
+                </span>
+              }
+            </div>
+
+            @if (p.description) {
+              <p class="mt-6 leading-relaxed text-slate-600">{{ p.description }}</p>
+            }
+
+            <div class="mt-8 flex flex-wrap gap-3">
+              <button type="button" disabled
+                      class="btn-primary !px-8 opacity-60 cursor-not-allowed"
+                      title="Sepet özelliği yakında">
+                Sepete Ekle (yakında)
+              </button>
+              <a routerLink="/" [queryParams]="{ categoryId: p.categoryId }" class="btn-secondary">
+                Benzer Ürünler
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
